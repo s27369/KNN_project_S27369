@@ -67,11 +67,12 @@ def get_k_smallest(l, k):
 def get_indicies(l, target_list):
     return [target_list.index(x) for x in l]
 
+def get_dataset_size(dataset):
+    return len(dataset["result"])
 
 def knn(observaion, k, train_set, return_differences=False):
-
     differences = []
-    for i in range(len(train_set[list(train_set.keys())[0]])):
+    for i in range(get_dataset_size(train_set)):
         x = get_observation(train_set, i)
         differences.append(get_difference(observaion, x))
     smallest = get_k_smallest(differences, k)#smallest differences
@@ -85,6 +86,21 @@ def classify(indicies,train_set):
         categories[train_set["result"][i]]+=1
     print(categories)
     return max(categories, key=categories.get)
+
+def classify_dataset(train_set, test_set, k):
+    test_size = get_dataset_size(test_set)
+    correct=0
+    for i in range(test_size):
+        observation=get_observation(test_set, i)
+        indicies, differences =knn(observation, k, train_set, True)
+        prediction = classify(indicies, train_set)
+        print(f'Classified {observation} as {prediction}')
+        if prediction==observation[-1]: correct+=1
+        else: print(f"{'^'*10}INCORRECT{'^'*10}")
+    print(f'Algorithm was correct in {correct/test_size}% of cases')
+
+
+
 if __name__ == '__main__':
 
 
@@ -95,9 +111,4 @@ if __name__ == '__main__':
     # k=int(input("k:"))
     k = 3
 
-    # d = get_observation(train, 0)
-
-    obs = get_observation(test, 4)
-
-    print(knn(obs, k, train, True))
-    print(classify(knn(obs, k, train), train))
+    classify_dataset(train, test, k)
