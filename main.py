@@ -61,6 +61,30 @@ def get_difference(observation, data): #returns a single float value representin
 def get_observation(dataset, index):
     return [dataset[x][index] for x in dataset]
 
+def get_k_smallest(l, k):
+    return sorted(l)[:k]
+
+def get_indicies(l, target_list):
+    return [target_list.index(x) for x in l]
+
+
+def knn(observaion, k, train_set, return_differences=False):
+
+    differences = []
+    for i in range(len(train_set[list(train_set.keys())[0]])):
+        x = get_observation(train_set, i)
+        differences.append(get_difference(observaion, x))
+    smallest = get_k_smallest(differences, k)#smallest differences
+    indicies = get_indicies(smallest, differences)#indicies of smallest differences
+    if return_differences: return indicies, smallest
+    return indicies
+
+def classify(indicies,train_set):
+    categories = {x:0 for x in set(train_set["result"])}
+    for i in indicies:
+        categories[train_set["result"][i]]+=1
+    print(categories)
+    return max(categories, key=categories.get)
 if __name__ == '__main__':
 
 
@@ -71,8 +95,9 @@ if __name__ == '__main__':
     # k=int(input("k:"))
     k = 3
 
-    d = get_observation(train, 0)
-    obs = get_observation(test, 0)
+    # d = get_observation(train, 0)
 
-    print(get_difference(obs, d))
+    obs = get_observation(test, 4)
 
+    print(knn(obs, k, train, True))
+    print(classify(knn(obs, k, train), train))
