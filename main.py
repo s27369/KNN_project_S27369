@@ -1,5 +1,5 @@
 import math
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 def read_file(path):
     with open(path, 'r') as f:
         file = f.read()
@@ -88,7 +88,7 @@ def classify(indicies,train_set, prnt=False):
     if prnt: print(categories)
     return max(categories, key=categories.get)
 
-def classify_dataset(train_set, test_set, k, prnt=False):
+def classify_dataset(train_set, test_set, k, prnt=False, diff=False):
     test_size = get_dataset_size(test_set)
     correct=0
     for i in range(test_size):
@@ -100,6 +100,7 @@ def classify_dataset(train_set, test_set, k, prnt=False):
         elif prnt: print(f"{'^'*10}INCORRECT{'^'*10}")
     accuracy= correct / test_size
     if prnt: print(f'Algorithm was correct in {accuracy}% of cases')
+    if diff: return accuracy, differences
     return accuracy
 
 
@@ -116,7 +117,15 @@ if __name__ == '__main__':
     #     classify_dataset(train, test, k, True)
     #     print()
 
+    # print(classify_dataset(train, test, 3, diff=True))
     accuracy ={}
-    for k in range(0, 101):
+    for k in range(0, 121):
         accuracy[k]=classify_dataset(train, test, k)
 
+    plt.plot(accuracy.keys(), accuracy.values())
+    plt.xlabel("K value")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy vs K value")
+    plt.xticks([x for x in range(0, 121, 5)])
+    plt.yticks([x*0.01 for x in range(0, 100, 5)])
+    plt.show()
