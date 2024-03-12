@@ -65,8 +65,15 @@ def get_observation(dataset, index):
 def get_k_smallest(l, k):
     return sorted(l)[:k]
 
-def get_indicies(l, target_list):
-    return [target_list.index(x) for x in l]
+def get_indices(l, target_list):
+    indices=[]
+    for i in range(len(l)):
+        for j in range(len(target_list)):
+            if l[i] == target_list[j]:
+                if not indices.__contains__(j):
+                    indices.append(j)
+
+    return indices
 
 def get_dataset_size(dataset):
     return len(dataset["result"])
@@ -77,7 +84,7 @@ def knn(observaion, k, train_set, return_differences=False):
         x = get_observation(train_set, i)
         differences.append(get_difference(observaion, x))
     smallest = get_k_smallest(differences, k)#smallest differences
-    indicies = get_indicies(smallest, differences)#indicies of smallest differences
+    indicies = get_indices(smallest, differences)#indicies of smallest differences
     if return_differences: return indicies, smallest
     return indicies
 
@@ -103,6 +110,26 @@ def classify_dataset(train_set, test_set, k, prnt=False, diff=False):
     if diff: return accuracy, differences
     return accuracy
 
+def interface(train, test):
+    quit=False
+    k = 1
+    while not quit:
+        print("Choose number:\n1 - choose k parameter value (default: 1)\n2 - input sample data to classify\n3 - quit\n>>>", end="")
+        i = int(input())
+        if i == 1:
+            k = int(input())
+            classify_dataset(train, test, k, True)
+        elif i == 2:
+            obs = input("input values separated by commas\n>>>")
+            obs = obs.split(",")
+            obs = [float(i.strip()) for i in obs]
+            obs.append("unknown")
+            print(classify(knn(obs, k, train), train, prnt=True))
+        elif i==3:
+            return
+        else:
+            print("Incorrect input.")
+
 
 if __name__ == '__main__':
     train = file_to_dict("iris_training.txt", True)
@@ -127,5 +154,7 @@ if __name__ == '__main__':
     plt.ylabel("Accuracy")
     plt.title("Accuracy vs K value")
     plt.xticks([x for x in range(0, 121, 5)])
-    plt.yticks([x*0.01 for x in range(0, 100, 5)])
+    plt.yticks([x*0.01 for x in range(30, 100, 5)])
     plt.show()
+
+    interface(train, test)
