@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot
 def read_file(path):
     with open(path, 'r') as f:
         file = f.read()
@@ -80,35 +81,42 @@ def knn(observaion, k, train_set, return_differences=False):
     if return_differences: return indicies, smallest
     return indicies
 
-def classify(indicies,train_set):
+def classify(indicies,train_set, prnt=False):
     categories = {x:0 for x in set(train_set["result"])}
     for i in indicies:
         categories[train_set["result"][i]]+=1
-    print(categories)
+    if prnt: print(categories)
     return max(categories, key=categories.get)
 
-def classify_dataset(train_set, test_set, k):
+def classify_dataset(train_set, test_set, k, prnt=False):
     test_size = get_dataset_size(test_set)
     correct=0
     for i in range(test_size):
         observation=get_observation(test_set, i)
         indicies, differences =knn(observation, k, train_set, True)
         prediction = classify(indicies, train_set)
-        print(f'Classified {observation} as {prediction}')
+        if prnt: print(f'Classified {observation} as {prediction}')
         if prediction==observation[-1]: correct+=1
-        else: print(f"{'^'*10}INCORRECT{'^'*10}")
-    print(f'Algorithm was correct in {correct/test_size}% of cases')
-
+        elif prnt: print(f"{'^'*10}INCORRECT{'^'*10}")
+    accuracy= correct / test_size
+    if prnt: print(f'Algorithm was correct in {accuracy}% of cases')
+    return accuracy
 
 
 if __name__ == '__main__':
-
-
-
     train = file_to_dict("iris_training.txt", True)
     test = file_to_dict("iris_test.txt", True)
 
     # k=int(input("k:"))
-    k = 3
+    # k = 3
 
-    classify_dataset(train, test, k)
+    # #demonstration
+    # for k in range(0, 101):
+    #     print(f'{"-"*20}K: {k}{"-"*20}')
+    #     classify_dataset(train, test, k, True)
+    #     print()
+
+    accuracy ={}
+    for k in range(0, 101):
+        accuracy[k]=classify_dataset(train, test, k)
+
