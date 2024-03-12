@@ -117,26 +117,42 @@ def interface(train, test):
         print("Choose number:\n1 - choose k parameter value (default: 1)\n2 - input sample data to classify\n3 - quit\n>>>", end="")
         i = int(input())
         if i == 1:
-            k = int(input())
-            classify_dataset(train, test, k, True)
+            try:
+                k = int(input())
+                classify_dataset(train, test, k, True)
+            except:
+                print("incorrect input")
         elif i == 2:
             obs = input("input values separated by commas\n>>>")
-            obs = obs.split(",")
-            obs = [float(i.strip()) for i in obs]
-            obs.append("unknown")
-            print(classify(knn(obs, k, train), train, prnt=True))
+            try:
+                obs = obs.split(",")
+                obs = [float(i.strip()) for i in obs]
+                obs.append("unknown")
+                print(classify(knn(obs, k, train), train, prnt=True))
+            except:
+                print("incorrect input.")
         elif i==3:
             return
         else:
             print("Incorrect input.")
 
+def get_plot(accuracy):
+    max_acc, min_acc = max(accuracy.values()), min(accuracy.values())
+    plt.plot(accuracy.keys(), accuracy.values())
+    plt.xlabel("K value")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy vs K value")
+    plt.xticks([x for x in range(0, 121, 5)])
+    plt.yticks([x * 0.01 for x in range(30, 100, 5)])
+    plt.axhline(y=max_acc, color='green')
+    plt.text(x=0, y=max_acc, s=f'Max accuracy: {max_acc}', color='green', fontsize=8, verticalalignment='bottom')
+    plt.axhline(y=min_acc, color='red')
+    plt.text(x=0, y=min_acc, s=f'Min accuracy: {min_acc}', color='red', fontsize=8, verticalalignment='bottom')
+    plt.show()
 
 if __name__ == '__main__':
     train = file_to_dict("iris_training.txt", True)
     test = file_to_dict("iris_test.txt", True)
-
-    # k=int(input("k:"))
-    # k = 3
 
     # #demonstration
     # for k in range(0, 101):
@@ -149,12 +165,6 @@ if __name__ == '__main__':
     for k in range(0, 121):
         accuracy[k]=classify_dataset(train, test, k)
 
-    plt.plot(accuracy.keys(), accuracy.values())
-    plt.xlabel("K value")
-    plt.ylabel("Accuracy")
-    plt.title("Accuracy vs K value")
-    plt.xticks([x for x in range(0, 121, 5)])
-    plt.yticks([x*0.01 for x in range(30, 100, 5)])
-    plt.show()
+    get_plot(accuracy)
 
     interface(train, test)
