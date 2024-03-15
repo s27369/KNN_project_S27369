@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 def read_file(path):
     with open(path, 'r') as f:
         file = f.read()
@@ -106,7 +107,7 @@ def classify_dataset(train_set, test_set, k, prnt=False, diff=False):
         if prediction==observation[-1]: correct+=1
         elif prnt: print(f"{'^'*10}INCORRECT{'^'*10}")
     accuracy= correct / test_size
-    if prnt: print(f'Algorithm was correct in {accuracy}% of cases')
+    if prnt: print(f'Successfully classified {correct}/{test_size} cases\nAlgorithm was correct in {accuracy*100}% of cases')
     if diff: return accuracy, differences
     return accuracy
 
@@ -114,15 +115,24 @@ def interface(train, test):
     quit=False
     k = 1
     while not quit:
-        print("Choose number:\n1 - choose k parameter value (default: 1)\n2 - input sample data to classify\n3 - quit\n>>>", end="")
-        i = int(input())
+        print("Choose number:\n1 - get model accuracy per K value (might take a while)\n2 - choose k parameter value (default: 1)\n3 - input sample data to classify\n4 - quit\n>>>", end="")
+        try:
+            i = int(input())
+        except:
+            print("Incorrect input.")
+            continue
         if i == 1:
+            accuracy = {}
+            for k in tqdm(range(0, get_dataset_size(train))):
+                accuracy[k] = classify_dataset(train, test, k)
+            get_plot(accuracy, get_dataset_size(train))
+        elif i == 2:
             try:
                 k = int(input())
                 classify_dataset(train, test, k, True)
             except:
                 print("incorrect input")
-        elif i == 2:
+        elif i == 3:
             obs = input("input values separated by commas\n>>>")
             try:
                 obs = obs.split(",")
@@ -131,19 +141,21 @@ def interface(train, test):
                 print(classify(knn(obs, k, train), train, prnt=True))
             except:
                 print("incorrect input.")
-        elif i==3:
+        elif i==4:
             return
         else:
             print("Incorrect input.")
 
-def get_plot(accuracy):
+
+def get_plot(accuracy, dataset_len):
     max_acc, min_acc = max(accuracy.values()), min(accuracy.values())
     plt.plot(accuracy.keys(), accuracy.values())
     plt.xlabel("K value")
     plt.ylabel("Accuracy")
     plt.title("Accuracy vs K value")
-    plt.xticks([x for x in range(0, 121, 5)])
-    plt.yticks([x * 0.01 for x in range(30, 100, 5)])
+    jump = dataset_len//20
+    plt.xticks([x for x in range(0, dataset_len + jump, jump)], rotation=90)
+    plt.yticks([x * 0.01 for x in range(0, 105, 5)])
     plt.axhline(y=max_acc, color='green')
     plt.text(x=0, y=max_acc, s=f'Max accuracy: {max_acc}', color='green', fontsize=8, verticalalignment='bottom')
     plt.axhline(y=min_acc, color='red')
@@ -153,18 +165,5 @@ def get_plot(accuracy):
 if __name__ == '__main__':
     train = file_to_dict("iris_training.txt", True)
     test = file_to_dict("iris_test.txt", True)
-
-    # #demonstration
-    # for k in range(0, 101):
-    #     print(f'{"-"*20}K: {k}{"-"*20}')
-    #     classify_dataset(train, test, k, True)
-    #     print()
-
-    # print(classify_dataset(train, test, 3, diff=True))
-    accuracy ={}
-    for k in range(0, 121):
-        accuracy[k]=classify_dataset(train, test, k)
-
-    get_plot(accuracy)
 
     interface(train, test)
